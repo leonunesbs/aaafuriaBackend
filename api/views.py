@@ -300,7 +300,8 @@ def checkout(request):
                     order_item.save()
                     order_item.item.save()
         else:
-            pass
+            order_item.ordered = True
+            order_item.save()
 
     order.ordered = True
     order.save()
