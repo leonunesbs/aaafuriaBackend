@@ -102,7 +102,7 @@ class Order(models.Model):
     status = models.CharField(max_length=5, default='AG')
 
     def __str__(self):
-        return self.user.username
+        return self.user.sócio.nome_completo
 
     def get_total(self):
         total = 0
