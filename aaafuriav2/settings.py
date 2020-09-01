@@ -8,7 +8,7 @@ BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 
 SECRET_KEY = config('SECRET_KEY')
 
-DEBUG = config('DEBUG')
+config('DEBUG', default=False, cast=bool)
 
 ALLOWED_HOSTS = ['aaafuria.com.br','aaafuria.vercel.app','localhost', '127.0.0.1']
 
