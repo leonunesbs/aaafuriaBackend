@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User, Group
 
 
-from ecommerce.models import Item, OrderItem, Order
+from ecommerce.models import Item, OrderItem, Order, Payment
 from rest_framework import serializers
 
 class UserSerializer(serializers.ModelSerializer):
@@ -26,9 +26,14 @@ class OrderItemSerializer(serializers.ModelSerializer):
         model = OrderItem
         fields = ['pk', 'item', 'quantity', 'final_price', 'size']
 
-
+class PaymentSerializer(serializers.ModelSerializer):
+    gateway = serializers.StringRelatedField(source='get_gateway_display')
+    class Meta:
+        model = Payment
+        fields = ['gateway']
 class OrderSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True, read_only=True)
+    payment = PaymentSerializer(read_only=True)
     class Meta:
         model = Order
-        fields = ['items', 'status', 'ordered_date']
+        fields = ['pk', 'items', 'status', 'ordered_date', 'order_total', 'payment']

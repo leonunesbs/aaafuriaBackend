@@ -1,5 +1,6 @@
 import stripe
 import json
+from django.utils import timezone
 from django.shortcuts import render
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -304,6 +305,8 @@ def checkout(request):
             order_item.save()
 
     order.ordered = True
+    order.order_total = order.get_total()
+    order.ordered_date = timezone.now()
     order.save()
     return Response({'success': 'Pedido finalizado'})
 

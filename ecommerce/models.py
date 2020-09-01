@@ -20,6 +20,11 @@ ITEM_SIZES = (
         ('GG', 'GG'),
         ('EXGG', 'EXGG'),
     )
+
+PAYMENT_GATEWAYS = (
+        ('TR', 'Transferência'),
+        ('ST', 'Stripe'),
+    )
 class Item(models.Model):
     title = models.CharField(max_length=15)
     image = models.ImageField(blank=True, null=True, upload_to='produtos')
@@ -99,6 +104,7 @@ class Order(models.Model):
     ordered = models.BooleanField(default=False)
     ordered_date = models.DateTimeField(blank=True, null=True)
 
+    order_total = models.FloatField(default=0)
     status = models.CharField(max_length=5, default='AG')
 
     def __str__(self):
@@ -113,7 +119,7 @@ class Order(models.Model):
 
 class Payment(models.Model):
     order = models.OneToOneField(Order, on_delete=models.CASCADE)
-    gateway = models.CharField(default='T', max_length=5)
+    gateway = models.CharField(choices=PAYMENT_GATEWAYS, max_length=2)
     amount = models.FloatField(default=0)
     comprovante = models.ImageField(upload_to='comprovantes', blank=True, null=True)
     paid = models.BooleanField(default=False)
