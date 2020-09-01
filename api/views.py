@@ -16,7 +16,7 @@ from rest_framework.decorators import (
 
 from django.views.decorators.csrf import csrf_exempt
 
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 
 from rest_framework.status import (
     HTTP_400_BAD_REQUEST,
@@ -66,6 +66,11 @@ def is_authenticated(request):
     if request.user.sócio.is_sócio:
         return Response({'is_sócio': request.user.sócio.is_sócio}, status=HTTP_200_OK)
     return Response({'is_sócio': False},status=HTTP_200_OK)
+
+@api_view(['GET'])
+@permission_classes((IsAdminUser,))
+def is_staff(request):
+    return Response({'isAdmin': True},status=HTTP_200_OK)
 
 @api_view(['POST'])
 @permission_classes((AllowAny,))
@@ -314,7 +319,14 @@ def checkout(request):
 
 @api_view(['GET'])
 @permission_classes((IsAuthenticated,))
-def pedidos(request):
+def pedidos_user(request):
     orders = Order.objects.filter(user=request.user, ordered=True)
+    serializer = OrderSerializer(orders, many=True)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+@permission_classes((IsAdminUser,))
+def pedidos_admin(request):
+    orders = Order.objects.filter(ordered=True)
     serializer = OrderSerializer(orders, many=True)
     return Response(serializer.data)

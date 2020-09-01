@@ -12,8 +12,10 @@ from . views import (
     carrinho,
     checkout,
     is_authenticated,
+    is_staff,
     create_payment,
-    pedidos
+    pedidos_user,
+    pedidos_admin
     
     )
  
@@ -21,12 +23,14 @@ app_name = 'api'
 urlpatterns = [
     path('login/', login),
     path('is-authenticated/', is_authenticated),
+    path('is-staff/', is_staff),
     path('cadastro/', cadastro),
     path('token-login/', reauthenticate),
     path('product-list/', product_list),
     path('product-detail/<int:pk>/', product_detail),
     path('carrinho/', carrinho),
-    path('meus-pedidos/', pedidos),
+    path('meus-pedidos/', pedidos_user),
+    path('pedidos-admin/', pedidos_admin),
     path('add-to-cart/', add_to_cart),
     path('remove-from-cart/', remove_from_cart),
     path('get-carrinho-total/', get_carrinho_total),
