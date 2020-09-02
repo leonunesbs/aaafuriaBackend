@@ -85,10 +85,11 @@ def cadastro(request):
     senha = request.data.get('senha')
     senha_again = request.data.get('senha_again')
     data_de_nascimento = request.data.get('data_de_nascimento')
+    is_sócio = request.data.get('is_sócio')
 
     email = email.lower()
 
-    if not (nome and email and matrícula and turma and senha and senha_again and data_de_nascimento):
+    if not (nome and email and matrícula and turma and senha and senha_again and data_de_nascimento and is_sócio):
         return Response({'error': 'Todos os campos são obrigatórios'})
 
     if matrícula and not matrícula.isnumeric():
@@ -117,6 +118,7 @@ def cadastro(request):
     user.sócio.data_de_nascimento = data_de_nascimento
     user.sócio.matrícula = matrícula
     user.sócio.turma = turma
+    user.sócio.is_sócio = is_sócio
     user.sócio.save()
 
     token, _ = Token.objects.get_or_create(user=user)
