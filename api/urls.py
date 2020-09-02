@@ -15,7 +15,10 @@ from . views import (
     is_staff,
     create_payment,
     pedidos_user,
-    pedidos_admin
+    pedidos_admin,
+    financeiro,
+    financeiro_last_in,
+    financeiro_last_out,
     
     )
  
@@ -36,4 +39,7 @@ urlpatterns = [
     path('get-carrinho-total/', get_carrinho_total),
     path('checkout/', checkout),
     path('create-payment/', create_payment),
+    path('financeiro/', financeiro),
+    path('financeiro-last-in/', financeiro_last_in),
+    path('financeiro-last-out/', financeiro_last_out),
 ]

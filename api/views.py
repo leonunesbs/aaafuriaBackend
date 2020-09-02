@@ -30,8 +30,9 @@ from rest_framework.response import Response
 
 
 from ecommerce.models import Item, Order, OrderItem, ItemSize, Payment
+from core.models import Financeiro
 
-from .serializers import ItemsSerializer, OrderItemSerializer, UserSerializer, OrderSerializer
+from .serializers import ItemsSerializer, OrderItemSerializer, UserSerializer, OrderSerializer, FinanceiroSerializer
 
 
 
@@ -344,3 +345,34 @@ def pedidos_admin(request):
     result = paginator.paginate_queryset(orders, request)
     serializer = OrderSerializer(result, many=True)
     return paginator.get_paginated_response(serializer.data)
+
+@api_view(['GET'])
+@permission_classes((IsAdminUser,))
+def financeiro(request):
+    paginator = PageNumberPagination()
+    paginator.page_size = 10
+    
+    financeiro = Financeiro.objects.all().order_by('-data_da_movimentação')
+
+    result = paginator.paginate_queryset(financeiro, request)
+    serializer = FinanceiroSerializer(result, many=True)
+    return paginator.get_paginated_response(serializer.data)
+
+@api_view(['GET'])
+@permission_classes((IsAdminUser,))
+def financeiro_last_in(request):
+    
+    financeiro = Financeiro.objects.filter(fluxo='E').order_by('-data_da_movimentação')
+    financeiro = financeiro.first()
+
+    serializer = FinanceiroSerializer(financeiro)
+    return Response(serializer.data, status=HTTP_200_OK)
+
+@api_view(['GET'])
+@permission_classes((IsAdminUser,))
+def financeiro_last_out(request):
+    financeiro = Financeiro.objects.filter(fluxo='S').order_by('-data_da_movimentação')
+    financeiro = financeiro.first()
+
+    serializer = FinanceiroSerializer(financeiro)
+    return Response(serializer.data, status=HTTP_200_OK)

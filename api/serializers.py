@@ -2,7 +2,7 @@ from django.contrib.auth.models import User, Group
 
 
 from ecommerce.models import Item, OrderItem, Order, Payment
-from core.models import Sócio
+from core.models import Sócio, Financeiro
 from rest_framework import serializers
 
 
@@ -48,3 +48,9 @@ class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = ['pk', 'user', 'items', 'status', 'ordered_date', 'order_total', 'payment']
+
+class FinanceiroSerializer(serializers.ModelSerializer):
+    fluxo = serializers.StringRelatedField(source='get_fluxo_display')
+    class Meta:
+        model = Financeiro
+        fields = ['fluxo', 'finalidade', 'valor', 'observações', 'responsável', 'data_da_movimentação']
