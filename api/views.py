@@ -89,8 +89,8 @@ def cadastro(request):
 
     email = email.lower()
 
-    if not (nome and email and matrícula and turma and senha and senha_again and data_de_nascimento and is_sócio):
-        return Response({'error': 'Todos os campos são obrigatórios'})
+    if not (nome and email and matrícula and turma and senha and senha_again and data_de_nascimento):
+        return Response({'error': 'Todos os campos são obrigatórios'}, status=HTTP_400_BAD_REQUEST)
 
     if matrícula and not matrícula.isnumeric():
         return Response({'error': 'Sua matrícula deve conter apenas números'}, status=HTTP_400_BAD_REQUEST)
