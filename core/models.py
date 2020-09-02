@@ -6,6 +6,8 @@ from django.dispatch import receiver
 class Sócio(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     nome_completo = models.CharField(max_length=100)
+    turma = models.CharField(max_length=2, default='00')
+    matrícula = models.CharField(default='00000000', max_length=8)
     is_sócio = models.BooleanField(default=False)
     data_de_nascimento = models.DateField(blank=True, null=True)
 

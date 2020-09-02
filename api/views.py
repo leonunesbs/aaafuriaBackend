@@ -79,7 +79,7 @@ def cadastro(request):
 
     nome = request.data.get('nome')
     email = request.data.get('email')
-    matricula = request.data.get('matricula')
+    matrícula = request.data.get('matrícula')
     turma = request.data.get('turma')
     senha = request.data.get('senha')
     senha_again = request.data.get('senha_again')
@@ -87,13 +87,13 @@ def cadastro(request):
 
     email = email.lower()
 
-    if not (nome and email and matricula and turma and senha and senha_again and data_de_nascimento):
+    if not (nome and email and matrícula and turma and senha and senha_again and data_de_nascimento):
         return Response({'error': 'Todos os campos são obrigatórios'})
 
-    if matricula and not matricula.isnumeric():
+    if matrícula and not matrícula.isnumeric():
         return Response({'error': 'Sua matrícula deve conter apenas números'}, status=HTTP_400_BAD_REQUEST)
 
-    if len(matricula) != 8:
+    if len(matrícula) != 8:
         return Response({'error': 'Sua matrícula deve conter 8 dígitos'})
 
     if senha != senha_again:
@@ -106,7 +106,7 @@ def cadastro(request):
         return Response({'error': 'Turma inválida'}, status=HTTP_400_BAD_REQUEST)
         
     try:
-        user = User.objects.create_user(username=matricula, email=email, password=senha)
+        user = User.objects.create_user(username=matrícula, email=email, password=senha)
     except:
         return Response({'error': 'Sua matrícula já se encontra cadastrada'}, status=HTTP_409_CONFLICT)
 
@@ -114,6 +114,8 @@ def cadastro(request):
     user.save()
     user.sócio.nome_completo = nome
     user.sócio.data_de_nascimento = data_de_nascimento
+    user.sócio.matrícula = matrícula
+    user.sócio.turma = turma
     user.sócio.save()
 
     token, _ = Token.objects.get_or_create(user=user)
@@ -312,6 +314,8 @@ def checkout(request):
     order.ordered = True
     order.order_total = order.get_total()
     order.ordered_date = timezone.now()
+    order.status = 'AG'
+    order.gateway = 'O'
     order.save()
     return Response({'success': 'Pedido finalizado'})
 

@@ -25,6 +25,17 @@ PAYMENT_GATEWAYS = (
         ('TR', 'Transferência'),
         ('ST', 'Stripe'),
     )
+
+ORDER_STATUS = (
+        ('AG', 'AGUARDANDO'),
+        ('PR', 'PROCESSANDO'),
+        ('CC', 'CONCLUIDO'),
+        ('XX', 'CANCELADO'),
+    )
+VENDA_GATEWAY = (
+        ('O', 'ONLINE'),
+        ('P', 'PRESENCIAL'),
+    )
 class Item(models.Model):
     title = models.CharField(max_length=15)
     image = models.ImageField(blank=True, null=True, upload_to='produtos')
@@ -105,7 +116,9 @@ class Order(models.Model):
     ordered_date = models.DateTimeField(blank=True, null=True)
 
     order_total = models.FloatField(default=0)
-    status = models.CharField(max_length=5, default='AG')
+    status = models.CharField(max_length=2, choices=ORDER_STATUS)
+
+    gateway = models.CharField(choices=VENDA_GATEWAY, max_length=1)
 
     def __str__(self):
         return self.user.sócio.nome_completo
