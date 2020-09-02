@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
-
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.decorators import (
     api_view,
     permission_classes
@@ -324,13 +324,23 @@ def checkout(request):
 @api_view(['GET'])
 @permission_classes((IsAuthenticated,))
 def pedidos_user(request):
+    paginator = PageNumberPagination()
+    paginator.page_size = 10
+
     orders = Order.objects.filter(user=request.user, ordered=True)
-    serializer = OrderSerializer(orders, many=True)
-    return Response(serializer.data)
+
+    result = paginator.paginate_queryset(orders, request)
+    serializer = OrderSerializer(result, many=True)
+    return paginator.get_paginated_response(serializer.data)
 
 @api_view(['GET'])
 @permission_classes((IsAdminUser,))
 def pedidos_admin(request):
+    paginator = PageNumberPagination()
+    paginator.page_size = 10
+    
     orders = Order.objects.filter(ordered=True)
-    serializer = OrderSerializer(orders, many=True)
-    return Response(serializer.data)
+
+    result = paginator.paginate_queryset(orders, request)
+    serializer = OrderSerializer(result, many=True)
+    return paginator.get_paginated_response(serializer.data)
