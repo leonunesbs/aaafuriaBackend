@@ -12,6 +12,9 @@ class Sócio(models.Model):
     data_de_nascimento = models.DateField(blank=True, null=True)
 
 
+    def __str__(self):
+        return self.nome_completo
+
     @receiver(post_save, sender=User)
     def create_user_socio(sender, instance, created, **kwargs):
         if created:
