@@ -352,7 +352,7 @@ def pedidos_admin(request):
 @permission_classes((IsAdminUser,))
 def financeiro(request):
     paginator = PageNumberPagination()
-    paginator.page_size = 10
+    paginator.page_size = 5
     
     financeiro = Financeiro.objects.all().order_by('-data_da_movimentação')
 
@@ -378,3 +378,24 @@ def financeiro_last_out(request):
 
     serializer = FinanceiroSerializer(financeiro)
     return Response(serializer.data, status=HTTP_200_OK)
+
+@api_view(['POST'])
+@permission_classes((IsAdminUser,))
+def financeiro_entries(request):
+    fluxo = request.data.get('fluxo')
+    finalidade = request.data.get('finalidade')
+    valor = request.data.get('valor')
+    observações = request.data.get('observações')
+    responsável = request.data.get('responsável')
+    data_da_movimentação = request.data.get('data_da_movimentação')
+
+    financeiro = Financeiro.objects.create(
+        fluxo = fluxo,
+        finalidade = finalidade,
+        valor = valor,
+        observações = observações,
+        responsável = responsável,
+        data_da_movimentação = data_da_movimentação,
+    )
+
+    return Response(status=HTTP_200_OK)

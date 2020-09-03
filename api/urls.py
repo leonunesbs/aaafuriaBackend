@@ -19,6 +19,7 @@ from . views import (
     financeiro,
     financeiro_last_in,
     financeiro_last_out,
+    financeiro_entries,
     
     )
  
@@ -42,4 +43,5 @@ urlpatterns = [
     path('financeiro/', financeiro),
     path('financeiro-last-in/', financeiro_last_in),
     path('financeiro-last-out/', financeiro_last_out),
+    path('financeiro-entries/', financeiro_entries),
 ]

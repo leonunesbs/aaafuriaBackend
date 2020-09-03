@@ -51,6 +51,7 @@ class OrderSerializer(serializers.ModelSerializer):
 
 class FinanceiroSerializer(serializers.ModelSerializer):
     fluxo = serializers.StringRelatedField(source='get_fluxo_display')
+    data_da_movimentação = serializers.DateField(format="%d/%m/%Y")
     class Meta:
         model = Financeiro
-        fields = ['fluxo', 'finalidade', 'valor', 'observações', 'responsável', 'data_da_movimentação']
+        fields = ['pk', 'fluxo', 'finalidade', 'valor', 'observações', 'responsável', 'data_da_movimentação']

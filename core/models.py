@@ -36,7 +36,7 @@ class Financeiro(models.Model):
     fluxo = models.CharField(max_length=1, choices=FLUXO_FINANCEIRO)
     finalidade = models.CharField(max_length=50)
     valor = models.FloatField()
-    observações = models.TextField()
+    observações = models.TextField(blank=True, null=True)
     responsável = models.CharField(max_length=25)
     data_da_movimentação = models.DateField()
     
