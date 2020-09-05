@@ -20,7 +20,7 @@ urlpatterns = [
     path('is-staff/', is_staff),
     path('cadastro/', cadastro),
     path('token-login/', reauthenticate),
-    path('meus-pedidos/', pedidos_user),
+    path('pedidos-user/', pedidos_user),
     path('pedidos-admin/', pedidos_admin),
     path('financeiro/', financeiro),
     path('financeiro-last-in/', financeiro_last_in),
