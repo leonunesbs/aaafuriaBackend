@@ -45,6 +45,8 @@ def add_to_cart(request):
 
 
         if item.has_variations:
+            if not tamanho:
+                return Response({'error': f'Selecione o TAMANHO do item. {item.title}.'}, status=HTTP_400_BAD_REQUEST)
             item_variation = ItemSize.objects.get(item=item, size=tamanho)
             if item.has_stock and item_variation.stock == 0:
                 return Response({'error': 'Tamanho fora de estoque', 'item': item.title}, status=HTTP_400_BAD_REQUEST)
