@@ -5,13 +5,15 @@ from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.status import (HTTP_200_OK, HTTP_400_BAD_REQUEST,
                                    HTTP_404_NOT_FOUND, HTTP_409_CONFLICT)
 
 from ecommerce.models import Order
+from ecommerce.serializers import OrderSerializer
 
 from .models import Financeiro
-from .serializers import UserSerializer
+from .serializers import UserSerializer, FinanceiroSerializer
 
 
 @api_view(['POST'])
@@ -141,7 +143,7 @@ def pedidos_user(request):
     paginator = PageNumberPagination()
     paginator.page_size = 10
 
-    orders = Order.objects.filter(user=request.user, ordered=True)
+    orders = Order.objects.filter(user=request.user, ordered=True).order_by('-ordered_date')
 
     result = paginator.paginate_queryset(orders, request)
     serializer = OrderSerializer(result, many=True)
@@ -154,7 +156,7 @@ def pedidos_admin(request):
     paginator = PageNumberPagination()
     paginator.page_size = 10
 
-    orders = Order.objects.filter(ordered=True)
+    orders = Order.objects.filter(ordered=True).order_by('-ordered_date')
 
     result = paginator.paginate_queryset(orders, request)
     serializer = OrderSerializer(result, many=True)
