@@ -17,6 +17,7 @@ class Sócio(models.Model):
     matrícula = models.CharField(default='00000000', max_length=8)
     is_sócio = models.BooleanField(default=False)
     data_de_nascimento = models.DateField(blank=True, null=True)
+    celular = models.CharField(max_length=16)
 
 
     def __str__(self):

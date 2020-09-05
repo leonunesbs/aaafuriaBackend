@@ -73,11 +73,12 @@ def cadastro(request):
     senha_again = request.data.get('senha_again')
     data_de_nascimento = request.data.get('data_de_nascimento')
     is_sócio = request.data.get('is_sócio')
+    celular = request.data.get('celular')
 
     email = email.lower()
 
     if not (nome and email and matrícula and turma and senha and senha_again
-            and data_de_nascimento):
+            and data_de_nascimento and celular):
         return Response({'error': 'Todos os campos são obrigatórios'},
                         status=HTTP_400_BAD_REQUEST)
 
@@ -118,6 +119,7 @@ def cadastro(request):
     user.sócio.matrícula = matrícula
     user.sócio.turma = turma
     user.sócio.is_sócio = is_sócio
+    user.sócio.celular = celular
     user.sócio.save()
 
     token, _ = Token.objects.get_or_create(user=user)
