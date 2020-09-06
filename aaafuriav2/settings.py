@@ -10,7 +10,7 @@ SECRET_KEY = config('SECRET_KEY')
 
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['aaafuriav2.herokuapp.com']
 
 
 
@@ -159,6 +159,7 @@ REST_FRAMEWORK = {
     ]
 }
 
+SECURE_SSL_REDIRECT = not DEBUG
 
 CORS_ORIGIN_ALLOW_ALL = True
 
