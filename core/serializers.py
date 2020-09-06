@@ -8,10 +8,16 @@ from .models import (
 
 
 class SócioSerializer(serializers.ModelSerializer):
-    nome_completo = serializers.StringRelatedField()
     class Meta:
         model = Sócio
-        fields = ['nome_completo', 'turma', 'matrícula']
+        fields = [
+            'nome_completo',
+            'turma',
+            'matrícula',
+            'is_sócio',
+            'data_de_nascimento',
+            'celular',
+        ]
 
 class UserSerializer(serializers.ModelSerializer):
     sócio = SócioSerializer()

@@ -13,7 +13,7 @@ from ecommerce.models import Order
 from ecommerce.serializers import OrderSerializer
 
 from .models import Financeiro
-from .serializers import UserSerializer, FinanceiroSerializer
+from .serializers import UserSerializer, FinanceiroSerializer, SócioSerializer
 
 
 @api_view(['POST'])
@@ -58,6 +58,18 @@ def is_authenticated(request):
 @permission_classes((IsAdminUser, ))
 def is_staff(request):
     return Response({'isAdmin': True}, status=HTTP_200_OK)
+
+
+@api_view(['GET', 'POST'])
+@permission_classes((IsAuthenticated,))
+def seja_sócio(request):
+    if request.method == 'GET':
+        sócio = request.user.sócio
+        serializer = SócioSerializer(sócio)
+        return Response(serializer.data)
+        
+    if request.method == 'POST':
+        pass
 
 
 @api_view(['POST'])
@@ -115,6 +127,7 @@ def cadastro(request):
 
     user.save()
     user.sócio.nome_completo = nome
+    user.sócio.email = email
     user.sócio.data_de_nascimento = data_de_nascimento
     user.sócio.matrícula = matrícula
     user.sócio.turma = turma
