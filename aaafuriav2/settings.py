@@ -32,7 +32,7 @@ INSTALLED_APPS = [
     'core',
     'ecommerce',
 
-    
+    'django_cleanup.apps.CleanupConfig',
 ]
 
 MIDDLEWARE = [
