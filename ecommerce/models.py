@@ -4,7 +4,10 @@ from django.contrib.auth.models import User
 
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
+from django.core.files.uploadedfile import InMemoryUploadedFile
 
+from io import BytesIO
+from PIL import Image as Img
 
 ITEM_SIZES = (
         ('PPBL', 'PPBL'),
@@ -50,6 +53,16 @@ class Item(models.Model):
 
     def __str__(self):
         return self.title
+
+    def save(self, *args, **kwargs):
+        if self.image:
+            img = Img.open(BytesIO(self.image.read()))
+            img.thumbnail((380,380), Img.ANTIALIAS)
+            out = BytesIO()
+            img.save(out, format='PNG', quality=99)
+            out.seek(0)
+            self.image = InMemoryUploadedFile(out, 'ImageField', '%s' %self.image.name, 'image/png', out, None)
+            super(Item, self).save(*args, **kwargs)
 
     @receiver(post_save, sender='ecommerce.Item')
     def create_variations(sender, instance, created, **kwargs):
