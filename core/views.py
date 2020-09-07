@@ -12,7 +12,7 @@ from rest_framework.status import (HTTP_200_OK, HTTP_400_BAD_REQUEST,
 from ecommerce.models import Order
 from ecommerce.serializers import OrderSerializer
 
-from .models import Financeiro
+from .models import Financeiro, Sócio
 from .serializers import UserSerializer, FinanceiroSerializer, SócioSerializer
 
 
@@ -39,7 +39,7 @@ def login(request):
     return Response(
         {
             'token': token.key,
-            'is_socio': user.sócio.is_sócio,
+            'is_socio': user.sócio.associação.is_active,
             'user': user_serialized.data
         },
         status=HTTP_200_OK)
@@ -48,8 +48,8 @@ def login(request):
 @api_view(['POST'])
 @permission_classes((IsAuthenticated, ))
 def is_authenticated(request):
-    if request.user.sócio.is_sócio:
-        return Response({'is_sócio': request.user.sócio.is_sócio},
+    if request.user.sócio.associação.is_active:
+        return Response({'is_sócio': request.user.sócio.associação.is_active},
                         status=HTTP_200_OK)
     return Response({'is_sócio': False}, status=HTTP_200_OK)
 
@@ -67,9 +67,16 @@ def seja_sócio(request):
         sócio = request.user.sócio
         serializer = SócioSerializer(sócio)
         return Response(serializer.data)
-        
+
     if request.method == 'POST':
-        pass
+        cpf = request.data.get('cpf')
+        foto = request.FILES['foto']
+
+        sócio = Sócio.objects.get(user=request.user)
+        sócio.cpf = cpf
+        sócio.foto = foto
+        sócio.save()
+        return Response(status=HTTP_200_OK)
 
 
 @api_view(['POST'])
@@ -131,7 +138,7 @@ def cadastro(request):
     user.sócio.data_de_nascimento = data_de_nascimento
     user.sócio.matrícula = matrícula
     user.sócio.turma = turma
-    user.sócio.is_sócio = is_sócio
+    user.sócio.associação.is_active = is_sócio
     user.sócio.celular = celular
     user.sócio.save()
 
@@ -158,7 +165,8 @@ def pedidos_user(request):
     paginator = PageNumberPagination()
     paginator.page_size = 10
 
-    orders = Order.objects.filter(user=request.user, ordered=True).order_by('-ordered_date')
+    orders = Order.objects.filter(
+        user=request.user, ordered=True).order_by('-ordered_date')
 
     result = paginator.paginate_queryset(orders, request)
     serializer = OrderSerializer(result, many=True)

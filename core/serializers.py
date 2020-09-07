@@ -12,6 +12,7 @@ class SócioSerializer(serializers.ModelSerializer):
         model = Sócio
         fields = [
             'nome_completo',
+            'email',
             'turma',
             'matrícula',
             'is_sócio',
