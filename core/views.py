@@ -42,7 +42,7 @@ def login(request):
         'is_socio': False,
     }
 
-    associação = Associação.objects.filter(user=user)
+    associação = Associação.objects.filter(sócio=user.sócio)
     if associação.exists():
         data['is_socio'] = user.sócio.associação.is_active
 
