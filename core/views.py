@@ -44,7 +44,7 @@ def login(request):
 
     associação = Associação.objects.filter(sócio=user.sócio)
     if associação.exists():
-        data['is_socio'] = user.sócio.associação.is_active
+        data['is_socio'] = associação.is_active
 
     return Response(data, status=HTTP_200_OK)
 
@@ -52,9 +52,11 @@ def login(request):
 @api_view(['POST'])
 @permission_classes((IsAuthenticated, ))
 def is_authenticated(request):
-    if request.user.sócio.associação.is_active:
-        return Response({'is_sócio': request.user.sócio.associação.is_active},
-                        status=HTTP_200_OK)
+    associação = Associação.objects.filter(sócio=user.sócio)
+    if associação.exists():
+        if associação.is_active:
+            return Response({'is_sócio': associação.is_active},
+                            status=HTTP_200_OK)
     return Response({'is_sócio': False}, status=HTTP_200_OK)
 
 
