@@ -1,6 +1,6 @@
 from .models import Associação
 from django.dispatch import receiver
-assofrom django.db.models.signals import post_save
+from django.db.models.signals import post_save
 
 
 @receiver(post_save, sender=Associação)
