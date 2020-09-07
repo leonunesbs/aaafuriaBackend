@@ -12,7 +12,7 @@ from rest_framework.status import (HTTP_200_OK, HTTP_400_BAD_REQUEST,
 from ecommerce.models import Order
 from ecommerce.serializers import OrderSerializer
 
-from .models import Financeiro, Sócio
+from .models import Financeiro, Sócio, Associação
 from .serializers import UserSerializer, FinanceiroSerializer, SócioSerializer
 
 
@@ -39,9 +39,11 @@ def login(request):
     data = {
         'token': token.key,
         'user': user_serialized.data
+        'is_socio': False,
     }
 
-    if user.sócio.associação:
+    associação = Associação.objects.filter(user=user)
+    if associação.exists():
         data['is_socio'] = user.sócio.associação.is_active
 
     return Response(data, status=HTTP_200_OK)
