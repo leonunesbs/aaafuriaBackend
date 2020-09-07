@@ -36,13 +36,15 @@ def login(request):
 
     user_serialized = UserSerializer(user)
 
-    return Response(
-        {
-            'token': token.key,
-            'is_socio': user.sócio.associação.is_active,
-            'user': user_serialized.data
-        },
-        status=HTTP_200_OK)
+    data = {
+        'token': token.key,
+        'user': user_serialized.data
+    }
+
+    if user.sócio.associação:
+        data['is_socio'] = user.sócio.associação.is_active
+
+    return Response(data, status=HTTP_200_OK)
 
 
 @api_view(['POST'])
