@@ -38,7 +38,7 @@ def login(request):
 
     data = {
         'token': token.key,
-        'user': user_serialized.data
+        'user': user_serialized.data,
         'is_socio': False,
     }
 
