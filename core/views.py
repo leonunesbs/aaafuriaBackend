@@ -12,7 +12,7 @@ from rest_framework.status import (HTTP_200_OK, HTTP_400_BAD_REQUEST,
 from ecommerce.models import Order
 from ecommerce.serializers import OrderSerializer
 
-from .models import Financeiro, Sócio, Associação
+from .models import Financeiro, Sócio, Associação, AssociaçãoCategoria
 from .serializers import UserSerializer, FinanceiroSerializer, SócioSerializer
 
 
@@ -101,8 +101,7 @@ def cadastro(request):
 
     email = email.lower()
 
-    if not (nome and email and matrícula and turma and senha and senha_again
-            and data_de_nascimento and celular):
+    if not (nome and email and matrícula and turma and senha and senha_again and data_de_nascimento and celular):
         return Response({'error': 'Todos os campos são obrigatórios'},
                         status=HTTP_400_BAD_REQUEST)
 
@@ -137,15 +136,21 @@ def cadastro(request):
         return Response({'error': 'Sua matrícula já se encontra cadastrada'},
                         status=HTTP_409_CONFLICT)
 
-    user.save()
+    if is_sócio == 'true':
+        ass = Associação.objects.create(
+            sócio=user.sócio,
+            categoria=AssociaçãoCategoria.objects.get(duração='S'),
+            is_active=True
+        )
+
     user.sócio.nome_completo = nome
     user.sócio.email = email
     user.sócio.data_de_nascimento = data_de_nascimento
     user.sócio.matrícula = matrícula
     user.sócio.turma = turma
-    user.sócio.associação.is_active = is_sócio
     user.sócio.celular = celular
     user.sócio.save()
+    user.save()
 
     token, _ = Token.objects.get_or_create(user=user)
 
