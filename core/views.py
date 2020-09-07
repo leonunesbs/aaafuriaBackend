@@ -39,12 +39,12 @@ def login(request):
     data = {
         'token': token.key,
         'user': user_serialized.data,
-        'is_socio': False,
+        'is_sócio': False,
     }
 
     associação = Associação.objects.filter(sócio=user.sócio)
     if associação.exists():
-        data['is_socio'] = associação.is_active
+        data['is_sócio'] = associação.is_active
 
     return Response(data, status=HTTP_200_OK)
 
