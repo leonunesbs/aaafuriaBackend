@@ -103,7 +103,7 @@ class OrderItem(models.Model):
         ItemSize, on_delete=models.CASCADE, blank=True, null=True)
 
     quantity = models.FloatField(default=1)
-    final_price = models.FloatField(null=True)
+    final_price = models.FloatField()
 
     ordered = models.BooleanField(default=False)
 

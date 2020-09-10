@@ -23,6 +23,7 @@ def product_list(request):
 
     return Response(serializer.data)
 
+
 @api_view(['GET'])
 @permission_classes((AllowAny,))
 def product_detail(request, pk):
@@ -35,58 +36,59 @@ def product_detail(request, pk):
 @api_view(['POST'])
 @permission_classes((IsAuthenticated,))
 def add_to_cart(request):
-        pk = request.data.get('pk')
-        tamanho = request.data.get('tamanho')
+    pk = request.data.get('pk')
+    tamanho = request.data.get('tamanho')
 
-        user = request.user
-        order, order_created = Order.objects.get_or_create(user=user, ordered=False)
+    user = request.user
+    order, order_created = Order.objects.get_or_create(
+        user=user, ordered=False)
 
-        item = Item.objects.get(pk=pk)
+    item = Item.objects.get(pk=pk)
 
+    if item.has_variations:
+        if not tamanho:
+            return Response({'error': f'Selecione o TAMANHO do item. {item.title}.'}, status=HTTP_400_BAD_REQUEST)
+        item_variation = ItemSize.objects.get(item=item, size=tamanho)
+        if item.has_stock and item_variation.stock == 0:
+            return Response({'error': 'Tamanho fora de estoque', 'item': item.title}, status=HTTP_400_BAD_REQUEST)
+        order_item, order_item_created = OrderItem.objects.get_or_create(
+            user=user,
+            item=item,
+            ordered=False,
+            size=item_variation
+        )
+    else:
+        if item.has_stock and item.stock == 0:
+            return Response({'error': 'Item fora de estoque', 'item': item.title}, status=HTTP_400_BAD_REQUEST)
 
-        if item.has_variations:
-            if not tamanho:
-                return Response({'error': f'Selecione o TAMANHO do item. {item.title}.'}, status=HTTP_400_BAD_REQUEST)
-            item_variation = ItemSize.objects.get(item=item, size=tamanho)
-            if item.has_stock and item_variation.stock == 0:
-                return Response({'error': 'Tamanho fora de estoque', 'item': item.title}, status=HTTP_400_BAD_REQUEST)
-            order_item, order_item_created = OrderItem.objects.get_or_create(
-                user=user, 
-                item=item,
-                ordered=False,
-                size=item_variation
-            )
-        else:
-            if item.has_stock and item.stock == 0:
-                return Response({'error': 'Item fora de estoque', 'item': item.title}, status=HTTP_400_BAD_REQUEST)
-            order_item, order_item_created = OrderItem.objects.get_or_create(
-                user=user, 
-                item=item,
-                ordered=False,
-            )
+        order_item, order_item_created = OrderItem.objects.get_or_create(
+            user=user,
+            item=item,
+            ordered=False,
+        )
 
-        order.items.add(order_item)
+    order.items.add(order_item)
 
-        if not order_item_created:
-            if item.has_stock:
-                if item.has_variations:
-                    if item_variation.stock >= (order_item.quantity + 1):
-                        order_item.quantity += 1
-                    else:
-                        return Response({'error': 'Variação fora de estoque'}, status=HTTP_400_BAD_REQUEST)
+    if not order_item_created:
+        if item.has_stock:
+            if item.has_variations:
+                if item_variation.stock >= (order_item.quantity + 1):
+                    order_item.quantity += 1
                 else:
-                    if item.stock >= (order_item.quantity + 1):
-                        order_item.quantity += 1
-                    else:
-                        return Response({'error': 'Item fora de estoque'}, status=HTTP_400_BAD_REQUEST)
+                    return Response({'error': 'Variação fora de estoque'}, status=HTTP_400_BAD_REQUEST)
             else:
-                order_item.quantity += 1
+                if item.stock >= (order_item.quantity + 1):
+                    order_item.quantity += 1
+                else:
+                    return Response({'error': 'Item fora de estoque'}, status=HTTP_400_BAD_REQUEST)
+        else:
+            order_item.quantity += 1
 
+    order.save()
+    order_item.save()
 
-        order.save()
-        order_item.save()
+    return Response({'message': 'Item adicionado ao Carrinho.'})
 
-        return Response({'message': 'Item adicionado ao Carrinho.'})
 
 @api_view(['POST'])
 @permission_classes((IsAuthenticated,))
@@ -98,7 +100,8 @@ def remove_from_cart(request):
         order_item.delete()
         return Response({'message': 'Item removido do Carrinho.'})
     except ObjectDoesNotExist:
-        return Response({'error': 'Este item não está no seu carrinho.'})  
+        return Response({'error': 'Este item não está no seu carrinho.'})
+
 
 @api_view(['GET'])
 @permission_classes((IsAuthenticated,))
@@ -109,10 +112,10 @@ def carrinho(request):
     serializer = OrderItemSerializer(order_item, many=True)
     price = 0
     for item in order_item:
-        price += item.final_price 
-
+        price += item.final_price
 
     return Response({'produtos': serializer.data, 'total': price}, status=HTTP_200_OK)
+
 
 @api_view(['GET'])
 @permission_classes((IsAuthenticated,))
@@ -149,23 +152,23 @@ def checkout(request):
     amount = request.data.get('amount')
     comprovante = request.FILES['comprovante']
 
-
     order = Order.objects.get(user=request.user, ordered=False)
 
     if gateway == 'TR':
-        payment = Payment.objects.create(order=order, gateway=gateway, amount=amount, comprovante=comprovante) 
+        payment = Payment.objects.create(
+            order=order, gateway=gateway, amount=amount, comprovante=comprovante)
 
     for produto in produtos:
         order_item = OrderItem.objects.get(pk=produto['pk'])
-        
-        
+
         # Verifica se o estoque é gerenciavel
         if order_item.item.has_stock:
             if order_item.item.has_variations:
-                item_variation = ItemSize.objects.get(item=order_item.item, size=produto['size'])
+                item_variation = ItemSize.objects.get(
+                    item=order_item.item, size=produto['size'])
                 if item_variation.stock >= produto['quantity']:
                     item_variation.stock -= produto['quantity']
-                    
+
                     item_variation.save()
 
                     order_item.ordered = True
@@ -178,8 +181,7 @@ def checkout(request):
 
                     order_item.item.stock -= produto['quantity']
                     order_item.ordered = True
-                    
-                    
+
                     order_item.save()
                     order_item.item.save()
         else:
