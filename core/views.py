@@ -51,7 +51,7 @@ def login(request):
     return Response(data, status=HTTP_200_OK)
 
 
-@api_view(['POST'])
+@api_view(['GET'])
 @permission_classes((IsAuthenticated, ))
 def is_authenticated(request):
     associação = Associação.objects.filter(sócio=request.user.sócio)
