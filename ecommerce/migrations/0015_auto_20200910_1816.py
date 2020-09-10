@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='orderitem',
             name='final_price',
-            field=models.FloatField(),
+            field=models.FloatField(default=0),
         ),
     ]
