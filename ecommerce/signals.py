@@ -18,7 +18,5 @@ def final_price_calculator(sender, instance, **kwargs):
         if associação.first().is_active:
             final_price = socio_price * quantity
             instance.final_price = final_price
-            instance.save()
     else:
         instance.final_price = price * quantity
-        instance.save()
