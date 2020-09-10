@@ -172,7 +172,7 @@ def toggle_associação(request, pk):
     ass = Associação.objects.get(pk=pk)
     ass.is_active = not ass.is_active
     ass.save()
-    return Response(status=HTTP_200_OK)
+    return Response({'is_active': ass.is_active}, status=HTTP_200_OK)
 
 
 @api_view(['POST'])
