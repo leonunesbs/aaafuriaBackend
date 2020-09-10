@@ -1,19 +1,21 @@
-from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
+from django.contrib.auth.models import User
 from django.shortcuts import render
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.pagination import PageNumberPagination
 from rest_framework.status import (HTTP_200_OK, HTTP_400_BAD_REQUEST,
                                    HTTP_404_NOT_FOUND, HTTP_409_CONFLICT)
 
 from ecommerce.models import Order
 from ecommerce.serializers import OrderSerializer
 
-from .models import Financeiro, Sócio, Associação, AssociaçãoCategoria
-from .serializers import UserSerializer, FinanceiroSerializer, SócioSerializer
+from .models import Associação, AssociaçãoCategoria, Financeiro, Sócio
+from .serializers import (AssociaçãoCategoriaSerializer, AssociaçãoSerializer,
+                          FinanceiroSerializer, SócioSerializer,
+                          UserSerializer)
 
 
 @api_view(['POST'])
@@ -74,14 +76,103 @@ def seja_sócio(request):
         return Response(serializer.data)
 
     if request.method == 'POST':
+        nome_completo = request.data.get('nome_completo')
+        matrícula = request.data.get('matrícula')
+        turma = request.data.get('turma')
+        data_de_nascimento = request.data.get('data_de_nascimento')
         cpf = request.data.get('cpf')
-        foto = request.FILES['foto']
+        email = request.data.get('email')
+        celular = request.data.get('celular')
+
+        try:
+            foto = request.FILES['foto']
+        except:
+            return Response({'error': 'Escolha uma foto'}, status=HTTP_400_BAD_REQUEST)
+
+        if not (
+            nome_completo and
+            matrícula and
+            turma and
+            data_de_nascimento and
+            cpf and
+            email and
+            celular
+        ):
+            return Response({'error': 'Todos os campos são obrigatórios'}, status=HTTP_400_BAD_REQUEST)
 
         sócio = Sócio.objects.get(user=request.user)
+        sócio.nome_completo = nome_completo
+        sócio.matrícula = matrícula
+        sócio.turma = turma
+        sócio.data_de_nascimento = data_de_nascimento
         sócio.cpf = cpf
+        sócio.email = email
+        sócio.celular = celular
         sócio.foto = foto
         sócio.save()
+
+        serializer = SócioSerializer(sócio)
+
+        return Response(serializer.data, status=HTTP_200_OK)
+
+
+@api_view(['POST'])
+@permission_classes((IsAuthenticated,))
+def create_associação(request):
+    comprovante = request.FILES['comprovante']
+    categoria = request.data.get('categoria')
+    conta_destino = request.data.get('conta_destino')
+
+    cat = AssociaçãoCategoria.objects.get(duração=categoria)
+
+    associação = Associação.objects.get_or_create(
+        sócio=request.user.sócio,
+        categoria=cat,
+        comprovante=comprovante,
+        conta_destino=conta_destino
+    )
+
+    return Response(status=HTTP_200_OK)
+
+
+@api_view(['GET'])
+@permission_classes((IsAuthenticated,))
+def get_user_associação(request):
+    ass = Associação.objects.filter(sócio=request.user.sócio)
+    if ass.exists():
         return Response(status=HTTP_200_OK)
+    else:
+        return Response(status=HTTP_404_NOT_FOUND)
+
+
+@api_view(['GET'])
+@permission_classes((IsAuthenticated,))
+def get_associação_category(request, categoria):
+    cat = AssociaçãoCategoria.objects.get(duração=categoria)
+    serializer = AssociaçãoCategoriaSerializer(cat)
+    return Response(serializer.data, status=HTTP_200_OK)
+
+
+@api_view(['GET'])
+@permission_classes((IsAdminUser,))
+def get_admin_associação(request):
+    paginator = PageNumberPagination()
+    paginator.page_size = 10
+
+    ass = Associação.objects.all().order_by('-created_date')
+
+    result = paginator.paginate_queryset(ass, request)
+    serializer = AssociaçãoSerializer(result, many=True)
+    return paginator.get_paginated_response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes((IsAuthenticated,))
+def toggle_associação(request, pk):
+    ass = Associação.objects.get(pk=pk)
+    ass.is_active = not ass.is_active
+    ass.save()
+    return Response(status=HTTP_200_OK)
 
 
 @api_view(['POST'])

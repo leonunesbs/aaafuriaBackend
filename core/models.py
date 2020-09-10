@@ -13,6 +13,11 @@ ASSOCIAÇÃO_TIPO = (
     ('S', 'SEMESTRAL'),
     ('A', 'ANUAL'),
 )
+CONTAS_DESTINO = (
+    ('BB', 'BANCO DO BRASIL'),
+    ('CX', 'CAIXA ECONÔMICA'),
+    ('ST', 'SANTANDER'),
+)
 
 
 class Sócio(models.Model):
@@ -38,7 +43,7 @@ class Sócio(models.Model):
 
 class AssociaçãoCategoria(models.Model):
     duração = models.CharField(choices=ASSOCIAÇÃO_TIPO, max_length=1)
-    valor = models.FloatField()
+    primeira = models.FloatField()
     reassociação = models.FloatField()
 
     def __str__(self):
@@ -54,10 +59,17 @@ class Associação(models.Model):
     categoria = models.ForeignKey(
         AssociaçãoCategoria, on_delete=models.CASCADE)
     is_active = models.BooleanField(default=False)
+    comprovante = models.ImageField(
+        upload_to='associação/comprovantes', blank=True, null=True)
+    conta_destino = models.CharField(
+        max_length=2, choices=CONTAS_DESTINO, blank=True, null=True)
     created_date = models.DateField(auto_now_add=True)
 
     class Meta:
         verbose_name_plural = 'Associações'
+
+    def __str__(self):
+        return self.sócio.nome_completo
 
 
 class Financeiro(models.Model):

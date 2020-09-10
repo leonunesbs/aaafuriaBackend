@@ -12,6 +12,12 @@ from .views import (
     financeiro_last_in,
     financeiro_last_out,
     financeiro_entries,
+
+    create_associação,
+    get_user_associação,
+    get_associação_category,
+    get_admin_associação,
+    toggle_associação
 )
 
 app_name = 'core'
@@ -28,4 +34,9 @@ urlpatterns = [
     path('financeiro-last-in/', financeiro_last_in),
     path('financeiro-last-out/', financeiro_last_out),
     path('financeiro-entries/', financeiro_entries),
+    path('create-associacao/', create_associação),
+    path('get-user-associacao/', get_user_associação),
+    path('get-associacao-category/<categoria>/', get_associação_category),
+    path('get-admin-associacao/', get_admin_associação),
+    path('toggle-associacao/<int:pk>/', toggle_associação),
 ]
