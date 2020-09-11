@@ -38,6 +38,7 @@ def product_detail(request, pk):
 def add_to_cart(request):
     pk = request.data.get('pk')
     tamanho = request.data.get('tamanho')
+    print(tamanho)
 
     user = request.user
     order, order_created = Order.objects.get_or_create(

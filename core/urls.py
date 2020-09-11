@@ -1,6 +1,7 @@
 from django.urls import path, include
 from .views import (
     login,
+    logout,
     seja_sócio,
     cadastro,
     reauthenticate,
@@ -23,6 +24,7 @@ from .views import (
 app_name = 'core'
 urlpatterns = [
     path('login/', login),
+    path('logout/', logout),
     path('seja-socio/', seja_sócio),
     path('is-authenticated/', is_authenticated),
     path('is-staff/', is_staff),
