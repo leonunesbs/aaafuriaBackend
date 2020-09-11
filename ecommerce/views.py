@@ -18,7 +18,7 @@ from .serializers import ItemsSerializer, OrderItemSerializer
 @api_view(['GET'])
 @permission_classes((AllowAny,))
 def product_list(request):
-    items = Item.objects.all()
+    items = Item.objects.filter(is_hidden=False)
     serializer = ItemsSerializer(items, many=True)
 
     return Response(serializer.data)

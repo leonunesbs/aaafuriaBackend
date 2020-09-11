@@ -52,6 +52,7 @@ class Item(models.Model):
     stock = models.IntegerField(default=0)
 
     has_variations = models.BooleanField(default=False)
+    is_hidden = models.BooleanField(default=False)
 
     def __str__(self):
         return self.title
