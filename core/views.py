@@ -6,7 +6,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.status import (HTTP_200_OK, HTTP_400_BAD_REQUEST,
+from rest_framework.status import (HTTP_200_OK, HTTP_204_NO_CONTENT, HTTP_400_BAD_REQUEST,
                                    HTTP_404_NOT_FOUND, HTTP_409_CONFLICT)
 
 from ecommerce.models import Order
@@ -58,7 +58,7 @@ def logout(request):
         Token.objects.get(user=request.user).delete()
         return Response(status=HTTP_200_OK)
     except TypeError:
-        return Response(status=HTTP_400_BAD_REQUEST)
+        return Response(status=HTTP_204_NO_CONTENT)
 
 
 @api_view(['GET'])
