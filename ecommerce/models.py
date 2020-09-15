@@ -32,7 +32,7 @@ PAYMENT_GATEWAYS = (
 ORDER_STATUS = (
     ('AG', 'AGUARDANDO'),
     ('PR', 'PROCESSANDO'),
-    ('CC', 'CONCLUIDO'),
+    ('CC', 'CONCLUÍDO'),
     ('XX', 'CANCELADO'),
 )
 VENDA_GATEWAY = (

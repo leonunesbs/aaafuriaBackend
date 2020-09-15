@@ -297,6 +297,19 @@ def pedidos_admin(request):
     return paginator.get_paginated_response(serializer.data)
 
 
+@api_view(['POST'])
+@permission_classes((IsAdminUser, ))
+def status_pedido_admin(request):
+    pk = request.data.get('pk')
+    status = request.data.get('status')
+
+    order = Order.objects.get(pk=pk)
+    order.status = status
+    order.save()
+
+    return Response(status=HTTP_200_OK)
+
+
 @api_view(['GET'])
 @permission_classes((IsAdminUser, ))
 def financeiro(request):
