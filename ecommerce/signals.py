@@ -23,8 +23,8 @@ def final_price_calculator(sender, instance, **kwargs):
         instance.final_price = price * quantity
 
 
-@receiver(post_save, sender=Order)
-# Marca pedidos como não Ordered ao serem cancelados
-def final_price_calculator(sender, instance, **kwargs):
-    if instance.status == 'XX':
-        instance.items.all().update(ordered=False)
+# @receiver(post_save, sender=Order)
+# # Marca pedidos como não Ordered ao serem cancelados
+# def final_price_calculator(sender, instance, **kwargs):
+#     if instance.status == 'XX':
+#         instance.items.all().update(ordered=False)
