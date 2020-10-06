@@ -1,3 +1,4 @@
 {
-  "python.linting.enabled": false
+  "python.languageServer": "Pylance",
+  "python.pythonPath": "env\\Scripts\\python.exe"
 }

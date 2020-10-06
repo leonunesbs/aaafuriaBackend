@@ -1,6 +1,9 @@
+from os import stat
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
-from django.shortcuts import render
+from django.core.exceptions import ObjectDoesNotExist
+from django.http import request
+from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.pagination import PageNumberPagination
@@ -18,74 +21,74 @@ from .serializers import (AssociaçãoCategoriaSerializer, AssociaçãoSerialize
                           UserSerializer)
 
 
-@api_view(['POST'])
-@permission_classes((AllowAny, ))
-def login(request):
-    username = request.data.get('username')
-    password = request.data.get('password')
+class AuthenticationView(APIView):
+    permission_classes = [AllowAny]
 
-    if username == '' or password == '' or username is None or password is None:
-        return Response({'error': 'Por favor, forneça usuário e senha.'},
-                        status=HTTP_400_BAD_REQUEST)
+    def get(self, request, format=None):
+        self.permission_classes = [IsAuthenticated]
+        if request.user.is_authenticated:
+            associação = Associação.objects.filter(sócio=request.user.sócio)
+            data = {}
+            if associação.exists() and associação.first().is_active:
+                data['is_sócio'] = associação.first().is_active
+                return Response(data,
+                                status=HTTP_200_OK)
+            if request.user.is_staff:
+                data['is_staff'] = True
+            data['is_sócio'] = False
+            return Response(data, status=HTTP_200_OK)
 
-    user = authenticate(username=username, password=password)
+    def post(self, request, format=None):
+        username = request.data.get('username')
+        password = request.data.get('password')
 
-    if not user:
-        return Response({'error': 'Credenciais inválidas'},
-                        status=HTTP_404_NOT_FOUND)
+        if username == '' or password == '' or username is None or password is None:
+            return Response({'error': 'Por favor, forneça usuário e senha.'},
+                            status=HTTP_400_BAD_REQUEST)
 
-    token, _ = Token.objects.get_or_create(user=user)
+        user = authenticate(username=username, password=password)
 
-    user_serialized = UserSerializer(user)
+        if not user:
+            return Response({'error': 'Credenciais inválidas'},
+                            status=HTTP_404_NOT_FOUND)
 
-    data = {
-        'token': token.key,
-        'user': user_serialized.data,
-        'is_sócio': False,
-    }
+        token, _ = Token.objects.get_or_create(user=user)
 
-    associação = Associação.objects.filter(sócio=user.sócio)
-    if associação.exists():
-        data['is_sócio'] = associação.first().is_active
+        user_serialized = UserSerializer(user)
 
-    return Response(data, status=HTTP_200_OK)
+        data = {
+            'token': token.key,
+            'user': user_serialized.data,
+            'is_sócio': False,
+            'is_staff': request.user.is_staff
+        }
 
+        associação = Associação.objects.filter(sócio=user.sócio)
+        if associação.exists():
+            data['is_sócio'] = associação.first().is_active
 
-@api_view(['DELETE'])
-@permission_classes((AllowAny, ))
-def logout(request):
-    try:
-        Token.objects.get(user=request.user).delete()
-        return Response(status=HTTP_200_OK)
-    except TypeError:
-        return Response(status=HTTP_204_NO_CONTENT)
+        return Response(data, status=HTTP_200_OK)
 
-
-@api_view(['GET'])
-@permission_classes((IsAuthenticated, ))
-def is_authenticated(request):
-    associação = Associação.objects.filter(sócio=request.user.sócio)
-    if associação.exists() and associação.first().is_active:
-        return Response({'is_sócio': associação.first().is_active},
-                        status=HTTP_200_OK)
-    return Response({'is_sócio': False}, status=HTTP_200_OK)
-
-
-@api_view(['GET'])
-@permission_classes((IsAdminUser, ))
-def is_staff(request):
-    return Response({'isAdmin': True}, status=HTTP_200_OK)
+    def delete(self, request, format=None):
+        try:
+            Token.objects.get(user=request.user).delete()
+            return Response(status=HTTP_200_OK)
+        except TypeError:
+            return Response({'error': 'Anonymous'}, status=HTTP_204_NO_CONTENT)
 
 
-@api_view(['GET', 'POST'])
-@permission_classes((IsAuthenticated,))
-def seja_sócio(request):
-    if request.method == 'GET':
+class SejaSócioView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def data_validation(self):
+        pass
+
+    def get(self, request, format=None):
         sócio = request.user.sócio
         serializer = SócioSerializer(sócio)
         return Response(serializer.data)
 
-    if request.method == 'POST':
+    def post(self, request, format=None):
         nome_completo = request.data.get('nome_completo')
         matrícula = request.data.get('matrícula')
         turma = request.data.get('turma')
@@ -126,41 +129,32 @@ def seja_sócio(request):
         return Response(serializer.data, status=HTTP_200_OK)
 
 
-@api_view(['POST'])
-@permission_classes((IsAuthenticated,))
-def create_associação(request):
-    comprovante = request.FILES['comprovante']
-    categoria = request.data.get('categoria')
-    conta_destino = request.data.get('conta_destino')
+class AssociaçãoView(APIView):
+    permission_classes = [IsAuthenticated]
 
-    cat = AssociaçãoCategoria.objects.get(duração=categoria)
+    def get(self, request, format=None):
+        ass = Associação.objects.filter(sócio=request.user.sócio)
+        if ass.exists():
+            return Response(status=HTTP_200_OK)
+        else:
+            return Response(status=HTTP_400_BAD_REQUEST)
 
-    associação = Associação.objects.get_or_create(
-        sócio=request.user.sócio,
-        categoria=cat,
-        comprovante=comprovante,
-        conta_destino=conta_destino
-    )
+    def post(self, request, format=None):
+        comprovante = request.FILES['comprovante']
+        categoria = request.data.get('categoria')
+        conta_destino = request.data.get('conta_destino')
 
-    return Response(status=HTTP_200_OK)
+        cat = AssociaçãoCategoria.objects.get(duração=categoria)
 
+        Associação.objects.get_or_create(
+            sócio=request.user.sócio,
+            categoria=cat,
+            comprovante=comprovante,
+            conta_destino=conta_destino
+        )
 
-@api_view(['GET'])
-@permission_classes((IsAuthenticated,))
-def get_user_associação(request):
-    ass = Associação.objects.filter(sócio=request.user.sócio)
-    if ass.exists():
-        return Response(status=HTTP_200_OK)
-    else:
-        return Response(status=HTTP_404_NOT_FOUND)
-
-
-@api_view(['GET'])
-@permission_classes((IsAuthenticated,))
-def get_associação_category(request, categoria):
-    cat = AssociaçãoCategoria.objects.get(duração=categoria)
-    serializer = AssociaçãoCategoriaSerializer(cat)
-    return Response(serializer.data, status=HTTP_200_OK)
+        serializer = AssociaçãoCategoriaSerializer(cat)
+        return Response(serializer.data, status=HTTP_200_OK)
 
 
 @api_view(['GET'])
@@ -177,7 +171,7 @@ def get_admin_associação(request):
 
 
 @api_view(['GET'])
-@permission_classes((IsAuthenticated,))
+@permission_classes((IsAdminUser,))
 def toggle_associação(request, pk):
     ass = Associação.objects.get(pk=pk)
     ass.is_active = not ass.is_active

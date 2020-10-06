@@ -38,7 +38,6 @@ def product_detail(request, pk):
 def add_to_cart(request):
     pk = request.data.get('pk')
     tamanho = request.data.get('tamanho')
-    print(tamanho)
 
     user = request.user
     order, order_created = Order.objects.get_or_create(
@@ -52,6 +51,7 @@ def add_to_cart(request):
         item_variation = ItemSize.objects.get(item=item, size=tamanho)
         if item.has_stock and item_variation.stock == 0:
             return Response({'error': 'Tamanho fora de estoque', 'item': item.title}, status=HTTP_400_BAD_REQUEST)
+
         order_item, order_item_created = OrderItem.objects.get_or_create(
             user=user,
             item=item,
