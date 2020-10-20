@@ -109,7 +109,7 @@ class OrderItem(models.Model):
     ordered = models.BooleanField(default=False)
 
     def __str__(self):
-        return f'{self.quantity} x {self.item.title}'
+        return f'{self.quantity} x {self.item.title} de {self.user.sócio.nome_completo}'
 
 
 class Order(models.Model):
