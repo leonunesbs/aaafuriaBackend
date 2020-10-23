@@ -33,7 +33,7 @@ class Sócio(models.Model):
     foto = models.ImageField(upload_to='socios', blank=True, null=True)
 
     def __str__(self):
-        return self.nome_completo
+        return f'{self.user.username} | {self.nome_completo}'
 
     @receiver(post_save, sender=User)
     def create_user_socio(sender, instance, created, **kwargs):

@@ -65,8 +65,9 @@ class Item(models.Model):
             img.save(out, format='PNG', quality=99)
             out.seek(0)
             self.image = InMemoryUploadedFile(
-                out, 'ImageField', '%s' % self.image.name, 'image/png', out, None)
-            super(Item, self).save(*args, **kwargs)
+            out, 'ImageField', '%s' % self.image.name, 'image/png', out, None)
+        
+        super(Item, self).save(*args, **kwargs)
 
     @receiver(post_save, sender='ecommerce.Item')
     def create_variations(sender, instance, created, **kwargs):

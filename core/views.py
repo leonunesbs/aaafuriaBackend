@@ -60,7 +60,7 @@ class AuthenticationView(APIView):
             'token': token.key,
             'user': user_serialized.data,
             'is_sócio': False,
-            'is_staff': request.user.is_staff
+            'is_staff': user.is_staff
         }
 
         associação = Associação.objects.filter(sócio=user.sócio)
